@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import create_db_and_tables
-from .routers import users, trips, stops, activities, itinerary, budget
+from .routers import users, trips, stops, activities, itinerary, budget, admin
 
 app = FastAPI(title="GlobeTrotter API")
 
@@ -27,6 +27,7 @@ app.include_router(stops.router)
 app.include_router(activities.router)
 app.include_router(itinerary.router)
 app.include_router(budget.router)
+app.include_router(admin.router)
 
 
 @app.get("/")

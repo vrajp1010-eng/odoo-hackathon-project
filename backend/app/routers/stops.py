@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from ..database import get_session
 from ..models import Stop, Trip
-from ..schemas import StopCreate, StopRead
+from ..schemas import StopCreate, StopRead, StopReorder
 
 router = APIRouter(prefix="/trips/{trip_id}/stops", tags=["stops"])
 
@@ -28,6 +28,19 @@ def list_stops(trip_id: int, session: Session = Depends(get_session)):
         select(Stop).where(Stop.trip_id == trip_id).order_by(Stop.order_index)
     ).all()
     return stops
+
+
+@router.patch("/reorder")
+def reorder_stops(trip_id: int, payload: StopReorder, session: Session = Depends(get_session)):
+    stops = session.exec(select(Stop).where(Stop.trip_id == trip_id)).all()
+    by_id = {stop.id: stop for stop in stops}
+    if len(payload.stop_ids) != len(stops) or set(payload.stop_ids) != set(by_id):
+        raise HTTPException(status_code=400, detail="The reorder list must include every stop")
+    for order_index, stop_id in enumerate(payload.stop_ids):
+        by_id[stop_id].order_index = order_index
+        session.add(by_id[stop_id])
+    session.commit()
+    return {"ok": True}
 
 
 @router.delete("/{stop_id}")

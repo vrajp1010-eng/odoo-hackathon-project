@@ -21,15 +21,24 @@ def get_budget(trip_id: int, session: Session = Depends(get_session)):
     total_cost = 0.0
     by_category: dict = defaultdict(float)
     by_stop: dict = defaultdict(float)
+    by_activity = []
 
     for stop in stops:
         for activity in stop.activities:
             total_cost += activity.cost
             by_category[activity.category] += activity.cost
             by_stop[stop.city_name] += activity.cost
+            by_activity.append({
+                "id": activity.id,
+                "name": activity.name,
+                "category": activity.category,
+                "cost": activity.cost,
+                "city_name": stop.city_name,
+            })
 
     return BudgetResponse(
         total_cost=total_cost,
         by_category=dict(by_category),
         by_stop=dict(by_stop),
+        by_activity=by_activity,
     )
