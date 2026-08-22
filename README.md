@@ -60,3 +60,10 @@ Open your web browser and navigate to **[http://localhost:5173](http://localhost
 ## Database
 
 The project uses SQLite (`globetrotter.db`) by default. The database is automatically initialized and seeded with default cities and users when you start the backend server for the first time.
+
+## 🌟 New Features (Added in Hackathon)
+- **Budget Tracking & Limits**: Set a maximum budget limit for your trips, automatically track expenses, and view visual "over budget" or "under budget" warnings.
+- **Trip Duplication**: Instantly copy any public trip with a single click to duplicate its itinerary and activities to your own account.
+- **Enhanced Search Filters**: Quickly filter destinations by country and activities by category or max cost.
+- **Global & Local Expansion**: The database now contains 39 stunning cities (including 8 localized Indian destinations like Jaipur, Kochi, and Agra) and over 150 unique activities.
+- **Dynamic Imagery**: Realistic photos automatically fetch from Wikimedia Commons and dynamically adapt as your trip's cover photo.

@@ -8,3 +8,9 @@ env/
 .env
 globetrotter.db
 .DS_Store
+*.log
+fix_*.py
+seed_more.py
+seed_india.py
+check_db.py
+__pycache__/
