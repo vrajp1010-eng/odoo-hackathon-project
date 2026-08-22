@@ -52,10 +52,10 @@ You will need to open **two separate terminal windows** (one for the backend, on
    ```bash
    npm run dev
    ```
-   *Your frontend is now running at `http://localhost:5174`*
+   *Your frontend is now running at `http://localhost:5173`*
 
 ### Step 3: View the App
-Open your web browser and navigate to **[http://localhost:5174](http://localhost:5174)**!
+Open your web browser and navigate to **[http://localhost:5173](http://localhost:5173)**!
 
 ## Database
 
