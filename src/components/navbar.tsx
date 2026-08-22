@@ -19,22 +19,22 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-border/50 shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <Globe className="h-6 w-6 text-blue-600" />
-          <span className="text-xl font-bold">Globe Trotter</span>
+
+          <span className="gradient-text font-extrabold text-xl tracking-tight">GlobeTrotter</span>
         </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/dashboard" className="text-sm font-medium transition-colors hover:text-blue-600">
+          <Link href="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
             Dashboard
           </Link>
-          <Link href="/trips" className="text-sm font-medium transition-colors hover:text-blue-600">
+          <Link href="/trips" className="text-sm font-medium transition-colors hover:text-primary">
             My Trips
           </Link>
-          <Link href="/profile" className="text-sm font-medium transition-colors hover:text-blue-600">
+          <Link href="/profile" className="text-sm font-medium transition-colors hover:text-primary">
             Profile
           </Link>
         </nav>

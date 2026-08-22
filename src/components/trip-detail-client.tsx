@@ -20,6 +20,7 @@ import { addTripStop, removeTripStop } from '@/actions/stop-actions'
 import { addTripActivity, removeTripActivity } from '@/actions/activity-actions'
 import { updateBudget } from '@/actions/budget-actions'
 import { searchCities, searchActivities } from '@/actions/catalog-actions'
+import { calculateTripScore } from '@/lib/trip-score'
 
 export function TripDetailClient({ initialTrip }: { initialTrip: any }) {
   const router = useRouter()
@@ -57,6 +58,9 @@ export function TripDetailClient({ initialTrip }: { initialTrip: any }) {
     return total + (stop.tripActivities || []).reduce((sum: number, act: any) => sum + (act.customCost || 0), 0)
   }, 0)
   const budgetStatus = budgetForm.totalBudget - totalSpent
+  
+  // Trip Health Score — calculated from current trip data
+  const scoreResult = calculateTripScore(trip)
   
   const handleSettingsUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -127,25 +131,70 @@ export function TripDetailClient({ initialTrip }: { initialTrip: any }) {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4 space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/trips" className={buttonVariants({ variant: "ghost", size: "icon" })}>
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">{trip.title}</h1>
-            <Badge variant={trip.isPublic ? "default" : "secondary"}>
+    <div className="min-h-screen bg-slate-50">
+      {/* Sticky Score Bar */}
+      <div className="sticky top-16 z-40 bg-white/90 backdrop-blur-md border-b border-border/50 shadow-sm">
+        <div className="container mx-auto px-4 py-2 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="text-lg font-bold truncate hidden sm:block">{trip.title}</h1>
+            <Badge variant={trip.isPublic ? 'default' : 'secondary'} className="shrink-0">
               {trip.isPublic ? <Globe className="h-3 w-3 mr-1" /> : <Lock className="h-3 w-3 mr-1" />}
               {trip.isPublic ? 'Public' : 'Private'}
             </Badge>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground mt-1 text-sm">
-            <Calendar className="h-4 w-4" />
-            <span>{trip.startDate ? new Date(trip.startDate).toLocaleDateString() : 'N/A'} - {trip.endDate ? new Date(trip.endDate).toLocaleDateString() : 'N/A'}</span>
+          {/* Score Widget */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2">
+              {/* SVG Score Ring */}
+              <div className="relative h-10 w-10">
+                <svg viewBox="0 0 36 36" className="h-10 w-10 -rotate-90">
+                  <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e2e8f0" strokeWidth="3" />
+                  <circle
+                    cx="18" cy="18" r="15.9155" fill="none"
+                    stroke={scoreResult.score >= 85 ? '#22c55e' : scoreResult.score >= 70 ? '#3b82f6' : scoreResult.score >= 50 ? '#f59e0b' : '#ef4444'}
+                    strokeWidth="3"
+                    strokeDasharray={`${scoreResult.score} ${100 - scoreResult.score}`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">{scoreResult.score}</span>
+              </div>
+              <div className="hidden md:block">
+                <p className="text-xs font-semibold">Trip Score</p>
+                <p className={`text-xs font-bold ${scoreResult.color}`}>{scoreResult.label}</p>
+              </div>
+            </div>
+            {/* Top breakdown tip */}
+            {scoreResult.breakdown.length > 0 && (
+              <div className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground bg-slate-100 rounded-full px-3 py-1.5 max-w-xs">
+                <span className={scoreResult.breakdown[0].points > 0 ? 'text-green-600' : 'text-amber-600'}>
+                  {scoreResult.breakdown[0].points > 0 ? '✓' : '!'}
+                </span>
+                <span className="truncate">{scoreResult.breakdown[0].tip}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      <div className="container mx-auto py-6 px-4 space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/trips" className={buttonVariants({ variant: "ghost", size: "icon" })}>
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold tracking-tight">{trip.title}</h1>
+              <Badge variant={trip.isPublic ? "default" : "secondary"}>
+                {trip.isPublic ? <Globe className="h-3 w-3 mr-1" /> : <Lock className="h-3 w-3 mr-1" />}
+                {trip.isPublic ? 'Public' : 'Private'}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground mt-1 text-sm">
+              <Calendar className="h-4 w-4" />
+              <span>{trip.startDate ? new Date(trip.startDate).toLocaleDateString() : 'N/A'} - {trip.endDate ? new Date(trip.endDate).toLocaleDateString() : 'N/A'}</span>
+            </div>
+          </div>
+        </div>
 
       <Tabs defaultValue="itinerary" className="w-full">
         <TabsList className="grid w-full grid-cols-4 lg:w-[400px]">
@@ -404,6 +453,7 @@ export function TripDetailClient({ initialTrip }: { initialTrip: any }) {
           </div>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   )
 }
