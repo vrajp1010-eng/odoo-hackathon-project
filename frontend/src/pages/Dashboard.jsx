@@ -51,7 +51,7 @@ function CityCard({ city }) {
     <div className="card city-rec-card">
       <div className="city-rec-img-wrap">
         <img
-          src={city.image_url || `https://picsum.photos/seed/${city.name}/400/250`}
+          src={city.image_url || `https://picsum.photos/seed/${city.name}Travel/400/250`}
           alt={city.name}
           className="city-rec-img"
         />
@@ -89,7 +89,7 @@ function NoTrips() {
       borderRadius: 'var(--radius)', padding: '32px 24px', textAlign: 'center',
       width: 260, flexShrink: 0,
     }}>
-      <div style={{ fontSize: 32, marginBottom: 10 }}>✈️</div>
+      <div style={{ fontSize: 32, marginBottom: 10 }}></div>
       <p style={{ fontWeight: 600, marginBottom: 4 }}>No trips yet</p>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
         Start planning your first adventure
@@ -165,15 +165,14 @@ export default function Dashboard({ user }) {
               {greeting},{' '}
               <span style={{ color: 'var(--accent)' }}>
                 {user?.name?.split(' ')[0] ?? 'Traveller'}
-              </span>{' '}
-              👋
+              </span>
             </h1>
             <p style={{ color: 'var(--text-secondary)', marginTop: 6, fontSize: 15 }}>
               Where are you headed next?
             </p>
           </div>
           <Link id="plan-new-trip-btn" to="/trips/new" className="btn btn-primary btn-lg">
-            ✈️&nbsp; Plan New Trip
+            Plan New Trip
           </Link>
         </div>
 

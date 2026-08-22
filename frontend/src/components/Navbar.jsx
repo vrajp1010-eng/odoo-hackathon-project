@@ -1,42 +1,50 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar({ user, onLogout, apiStatus }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     onLogout();
     navigate('/login');
   };
 
+  const isActive = (path) => location.pathname === path ? 'active' : '';
+
   return (
     <nav className="navbar">
-      <div className="container navbar-inner">
+      <div className="navbar-container">
+        
+        {/* Brand */}
         <Link to={user ? '/dashboard' : '/login'} className="navbar-brand">
-          GlobeTrotter
+          GLOBETROTTER
         </Link>
 
-        <div className="navbar-links">
-          {/* API status dot */}
-          <span className={`api-status ${apiStatus === 'ok' ? 'ok' : 'err'}`}>
-            <span className="api-status-dot" />
-            {apiStatus === 'ok' ? 'API online' : apiStatus === 'checking' ? 'Connecting…' : 'API offline'}
-          </span>
+        {/* Center/Nav Links */}
+        {user && (
+          <div className="navbar-links" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+            <Link to="/dashboard" className={`nav-link ${isActive('/dashboard')}`}>Dashboard</Link>
+            <Link to="/trips" className={`nav-link ${isActive('/trips')}`}>My Trips</Link>
+          </div>
+        )}
 
+        {/* Right side actions */}
+        <div className="navbar-links" style={{ gap: '16px' }}>
           {user ? (
             <>
-              <Link to="/trips"     className="btn btn-ghost btn-sm">My Trips</Link>
-              <Link to="/trips/new" className="btn btn-outline btn-sm">+ New Trip</Link>
-              <button onClick={handleLogout} className="btn btn-ghost btn-sm">
+              <Link to="/trips/new" className="btn btn-primary btn-sm">Plan a Trip</Link>
+              <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                 Sign out
               </button>
             </>
           ) : (
             <>
-              <Link to="/login"  className="btn btn-ghost btn-sm">Sign in</Link>
-              <Link to="/signup" className="btn btn-primary btn-sm">Get started</Link>
+              <Link to="/login"  className="nav-link">Login</Link>
+              <Link to="/signup" className="btn btn-primary btn-sm" style={{ padding: '8px 24px' }}>Get Started</Link>
             </>
           )}
         </div>
+
       </div>
     </nav>
   );

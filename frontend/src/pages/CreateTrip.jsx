@@ -62,7 +62,7 @@ export default function CreateTrip() {
         {/* Header */}
         <div className="page-header-row" style={{ marginBottom: 28 }}>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800 }}>Plan a New Trip ✈️</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 800 }}>Plan a New Trip</h1>
             <p style={{ color: 'var(--text-secondary)', marginTop: 4 }}>
               Fill in the basics — you'll add cities and activities next
             </p>

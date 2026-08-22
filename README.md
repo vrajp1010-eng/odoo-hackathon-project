@@ -1,40 +1,62 @@
-# GlobeTrotter - Hackathon Project
+# Globetrotter Trip Planner
 
-GlobeTrotter is a full-stack multi-city travel itinerary planner built for a hackathon.
+A full-stack web application for planning travel itineraries, built with React (Vite) on the frontend and FastAPI (Python) on the backend.
 
-## Tech Stack
-* **Frontend**: React, Vite, React Router, Recharts
-* **Backend**: Python, FastAPI, SQLAlchemy, SQLite
-* **Auth**: Custom JWT-based Authentication
+## Prerequisites
 
-## Features
-* Secure signup and login.
-* Dashboard to view your trips.
-* Create and manage trips.
-* Interactive drag-and-drop itinerary builder (using `@dnd-kit`).
-* Attach specific activities to each city stop with expected costs.
-* Beautiful interactive budget pie charts and bar charts.
-* A read-only chronological timeline and presentation view.
-* Shareable public links for your itineraries.
+Before running the project, make sure you have the following installed on your machine:
+- **Node.js** (v16 or higher)
+- **Python** (v3.10 or higher)
 
-## Getting Started
+## 🚀 How to Run the Project Locally
 
-### Backend
-```bash
-cd backend
-python -m venv .venv
-# Activate venv: .venv\Scripts\activate (Windows) or source .venv/bin/activate (Mac/Linux)
-pip install "fastapi[standard]" sqlalchemy passlib bcrypt python-jose
-python seed.py # Optional, generates sample data
-uvicorn main:app --reload --port 8000
-```
+You will need to open **two separate terminal windows** (one for the backend, one for the frontend).
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities recharts react-router-dom axios jwt-decode
-npm run dev
-```
+### Step 1: Start the Backend (FastAPI)
 
-Enjoy planning your trips!
+1. Open your first terminal and navigate to the backend folder:
+   ```bash
+   cd backend
+   ```
+2. *(Optional but recommended)* Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   # On Windows:
+   venv\Scripts\activate
+   # On Mac/Linux:
+   source venv/bin/activate
+   ```
+3. Install the required Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Start the Uvicorn server:
+   ```bash
+   uvicorn main:app --reload --port 8000
+   ```
+   *Your backend is now running at `http://localhost:8000`*
+
+---
+
+### Step 2: Start the Frontend (React / Vite)
+
+1. Open your second terminal and navigate to the frontend folder:
+   ```bash
+   cd frontend
+   ```
+2. Install the Node modules:
+   ```bash
+   npm install
+   ```
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   *Your frontend is now running at `http://localhost:5173`*
+
+### Step 3: View the App
+Open your web browser and navigate to **[http://localhost:5173](http://localhost:5173)**!
+
+## Database
+
+The project uses SQLite (`globetrotter.db`) by default. The database is automatically initialized and seeded with default cities and users when you start the backend server for the first time.
