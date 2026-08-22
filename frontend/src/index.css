@@ -437,8 +437,8 @@ img {
 }
 
 /* ── Auth / Login ────────────────────────────────────────────────────────── */
-.auth-page {
-  min-height: 100vh;
+.auth-wrap {
+  min-height: calc(100vh - 80px); /* Account for navbar */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -787,4 +787,46 @@ img {
   color: white;
   font-size: 13px;
   font-weight: 600;
+}
+
+/* ── City Search Results (Modal) ─────────────────────────────────────────── */
+.city-search-results {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.city-search-result {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.city-search-result:last-child {
+  border-bottom: none;
+}
+.city-search-result:hover {
+  background: var(--bg-surface-hover);
+}
+
+.city-result-thumb {
+  width: 80px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.city-result-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.city-result-country {
+  font-size: 13px;
+  color: var(--text-secondary);
 }
