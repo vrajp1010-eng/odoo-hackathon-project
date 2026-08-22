@@ -179,6 +179,7 @@ class TripSummary(BaseModel):
     share_slug: Optional[str] = None
     created_at: datetime.datetime
     stop_count: int = 0
+    first_city_image_url: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

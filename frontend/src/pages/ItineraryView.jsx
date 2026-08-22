@@ -134,9 +134,9 @@ export default function ItineraryView() {
         </div>
 
         {/* Cover */}
-        {trip.cover_photo_url && (
+        {(trip.cover_photo_url || trip.stops?.[0]?.city?.image_url) && (
           <img
-            src={trip.cover_photo_url}
+            src={trip.cover_photo_url || trip.stops[0].city.image_url}
             alt="Cover"
             style={{ width: '100%', height: 260, objectFit: 'cover', borderRadius: 'var(--radius-lg)', marginBottom: 40 }}
           />

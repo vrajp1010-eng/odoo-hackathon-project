@@ -39,7 +39,7 @@ export default function TripCard({ trip, onDelete }) {
       <div className="trip-card-cover-wrap">
         <img
           className="trip-card-cover"
-          src={trip.cover_photo_url || fallbackImg}
+          src={trip.cover_photo_url || trip.first_city_image_url || fallbackImg}
           alt={trip.name}
         />
         {/* Public badge overlay */}

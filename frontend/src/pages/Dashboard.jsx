@@ -27,7 +27,7 @@ function TripScrollCard({ trip }) {
         <img
           className="trip-card-img"
           style={{ height: 150 }}
-          src={trip.cover_photo_url || `https://picsum.photos/seed/trip${trip.id}/520/300`}
+          src={trip.cover_photo_url || trip.first_city_image_url || `https://picsum.photos/seed/trip${trip.id}/520/300`}
           alt={trip.name}
         />
         <div className="trip-card-body">

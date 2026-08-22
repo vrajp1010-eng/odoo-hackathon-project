@@ -42,27 +42,27 @@ def seed():
             models.City(
                 name="Paris", country="France",
                 cost_index=85.0, popularity=98.0,
-                image_url="https://picsum.photos/seed/paris/800/500",
+                image_url="https://upload.wikimedia.org/wikipedia/commons/4/4b/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques_000222.jpg",
             ),
             models.City(
                 name="Amsterdam", country="Netherlands",
                 cost_index=78.0, popularity=91.0,
-                image_url="https://picsum.photos/seed/amsterdam/800/500",
+                image_url="https://upload.wikimedia.org/wikipedia/commons/b/be/KeizersgrachtReguliersgrachtAmsterdam.jpg",
             ),
             models.City(
                 name="Berlin", country="Germany",
                 cost_index=62.0, popularity=87.0,
-                image_url="https://picsum.photos/seed/berlin/800/500",
+                image_url="https://upload.wikimedia.org/wikipedia/commons/a/a6/Brandenburger_Tor_abends.jpg",
             ),
             models.City(
                 name="Prague", country="Czech Republic",
                 cost_index=44.0, popularity=84.0,
-                image_url="https://picsum.photos/seed/prague/800/500",
+                image_url="https://upload.wikimedia.org/wikipedia/commons/a/a7/Prague_%286365119737%29.jpg",
             ),
             models.City(
                 name="Rome", country="Italy",
                 cost_index=74.0, popularity=95.0,
-                image_url="https://picsum.photos/seed/rome/800/500",
+                image_url="https://upload.wikimedia.org/wikipedia/commons/d/d8/Colosseum_in_Rome-April_2007-1-_copie_2B.jpg",
             ),
         ]
         db.add_all(cities)

@@ -2,6 +2,17 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 
+const NATURE_COVERS = [
+  "https://picsum.photos/seed/nature1/1200/600",
+  "https://picsum.photos/seed/nature2/1200/600",
+  "https://picsum.photos/seed/nature3/1200/600",
+  "https://picsum.photos/seed/nature4/1200/600",
+  "https://picsum.photos/seed/nature5/1200/600",
+  "https://picsum.photos/seed/nature6/1200/600",
+  "https://picsum.photos/seed/nature7/1200/600",
+  "https://picsum.photos/seed/nature8/1200/600"
+];
+
 /* ── Validation ─────────────────────────────────────────────────────────── */
 function validate(form) {
   const errors = {};
@@ -45,7 +56,7 @@ export default function CreateTrip() {
         ...form,
         start_date: form.start_date || null,
         end_date:   form.end_date   || null,
-        cover_photo_url: form.cover_photo_url.trim() || null,
+        cover_photo_url: form.cover_photo_url.trim() || NATURE_COVERS[Math.floor(Math.random() * NATURE_COVERS.length)],
       };
       const { data } = await api.post('/trips', payload);
       navigate(`/trips/${data.id}/build`);
@@ -136,38 +147,7 @@ export default function CreateTrip() {
                 />
               </div>
 
-              {/* Cover photo URL */}
-              <div className="form-group">
-                <label className="form-label" htmlFor="trip-cover">
-                  Cover photo URL
-                  <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: 6 }}>
-                    (optional)
-                  </span>
-                </label>
-                <input
-                  id="trip-cover"
-                  className="form-input"
-                  type="url"
-                  placeholder="https://picsum.photos/seed/mytrip/1200/600"
-                  value={form.cover_photo_url}
-                  onChange={set('cover_photo_url')}
-                />
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                  Leave blank for a default image. Try picsum.photos for free placeholders.
-                </span>
-              </div>
-
-              {/* Cover preview */}
-              {form.cover_photo_url && (
-                <div style={{ marginBottom: 20 }}>
-                  <img
-                    src={form.cover_photo_url}
-                    alt="Cover preview"
-                    style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}
-                    onError={(e) => { e.target.style.display = 'none'; }}
-                  />
-                </div>
-              )}
+              {/* Cover photo field removed as requested. Auto-generated nature photo will be used on submit. */}
 
               {/* Make public toggle */}
               <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 28 }}>

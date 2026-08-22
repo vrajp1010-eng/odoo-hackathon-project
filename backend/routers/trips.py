@@ -42,7 +42,7 @@ def list_my_trips(
     user = _resolve_user(authorization, db)
     trips = (
         db.query(models.Trip)
-        .options(joinedload(models.Trip.stops))
+        .options(joinedload(models.Trip.stops).joinedload(models.TripStop.city))
         .filter(models.Trip.user_id == user.id)
         .order_by(models.Trip.created_at.desc())
         .all()
@@ -51,6 +51,8 @@ def list_my_trips(
     for trip in trips:
         data = schemas.TripSummary.model_validate(trip).model_dump()
         data["stop_count"] = len(trip.stops)
+        if trip.stops and trip.stops[0].city:
+            data["first_city_image_url"] = trip.stops[0].city.image_url
         result.append(data)
     return result
 
