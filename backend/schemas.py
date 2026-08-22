@@ -26,7 +26,11 @@ class BudgetOut(BaseModel):
     cost_per_day: float
     cost_per_city: List[CityCostBreakdown]
     category_breakdown: List[CategoryBreakdown]
+    budget_limit: Optional[float] = None
+    is_over_budget: Optional[bool] = None
 
+class TripBudgetLimitUpdate(BaseModel):
+    budget_limit: Optional[float] = None
 
 # ─── City ────────────────────────────────────────────────────────────────────
 
@@ -133,6 +137,7 @@ class TripBase(BaseModel):
     description: Optional[str] = None
     cover_photo_url: Optional[str] = None
     is_public: bool = False
+    budget_limit: Optional[float] = None
 
 
 class TripCreate(TripBase):
@@ -147,6 +152,7 @@ class TripUpdate(BaseModel):
     description: Optional[str] = None
     cover_photo_url: Optional[str] = None
     is_public: Optional[bool] = None
+    budget_limit: Optional[float] = None
 
 
 class TripOut(TripBase):
@@ -169,6 +175,7 @@ class TripSummary(BaseModel):
     description: Optional[str] = None
     cover_photo_url: Optional[str] = None
     is_public: bool
+    budget_limit: Optional[float] = None
     share_slug: Optional[str] = None
     created_at: datetime.datetime
     stop_count: int = 0

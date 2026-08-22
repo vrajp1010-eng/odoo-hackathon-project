@@ -21,6 +21,10 @@ export default function ItineraryView() {
   const [viewMode, setViewMode] = useState('itinerary'); // 'itinerary' | 'timeline'
   const [sharing, setSharing] = useState(false);
   const [shareLink, setShareLink] = useState('');
+  
+  // Budget limit states
+  const [budgetLimitInput, setBudgetLimitInput] = useState('');
+  const [savingBudget, setSavingBudget] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -32,6 +36,9 @@ export default function ItineraryView() {
       t.stops.sort((a, b) => a.order_index - b.order_index);
       setTrip(t);
       setBudget(budgetRes.data);
+      if (budgetRes.data.budget_limit) {
+        setBudgetLimitInput(budgetRes.data.budget_limit.toString());
+      }
       if (t.is_public && t.share_slug) {
         setShareLink(`${window.location.origin}/share/${t.share_slug}`);
       }
@@ -39,6 +46,21 @@ export default function ItineraryView() {
     .catch(() => {})
     .finally(() => setLoading(false));
   }, [tripId]);
+
+  const handleSaveBudgetLimit = async () => {
+    if (savingBudget) return;
+    setSavingBudget(true);
+    try {
+      const val = parseFloat(budgetLimitInput);
+      const payload = { budget_limit: isNaN(val) ? null : val };
+      const { data } = await api.put(`/trips/${tripId}/budget-limit`, payload);
+      setBudget(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingBudget(false);
+    }
+  };
 
   const handleShare = async () => {
     if (sharing) return;
@@ -253,6 +275,22 @@ export default function ItineraryView() {
             
             {budget && (
               <div className="card" style={{ padding: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginBottom: 24 }}>
+                  <div className="form-group" style={{ marginBottom: 0, flex: 1 }}>
+                    <label className="form-label" style={{ fontSize: 12 }}>Set a budget limit (optional)</label>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      placeholder="e.g. 5000" 
+                      value={budgetLimitInput} 
+                      onChange={e => setBudgetLimitInput(e.target.value)} 
+                    />
+                  </div>
+                  <button className="btn btn-outline btn-sm" onClick={handleSaveBudgetLimit} disabled={savingBudget} style={{ height: 38 }}>
+                    {savingBudget ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
                   <p style={{ fontSize: 13, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '.05em', fontWeight: 700, marginBottom: 4 }}>Total Estimated Cost</p>
                   <div style={{ fontSize: 36, fontWeight: 800, color: 'var(--accent)' }}>
@@ -262,6 +300,17 @@ export default function ItineraryView() {
                     ~${budget.cost_per_day.toFixed(0)} / day
                   </p>
                 </div>
+
+                {budget.is_over_budget === true && (
+                  <div style={{ background: '#fffbeb', color: '#b45309', padding: '10px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, textAlign: 'center', marginBottom: 20, border: '1px solid #fde68a' }}>
+                    ⚠️ This trip is ${(budget.total_cost - budget.budget_limit).toFixed(0)} over your budget limit.
+                  </div>
+                )}
+                {budget.is_over_budget === false && (
+                  <div style={{ background: '#ecfdf5', color: '#047857', padding: '10px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600, textAlign: 'center', marginBottom: 20, border: '1px solid #a7f3d0' }}>
+                    ✅ This trip is ${(budget.budget_limit - budget.total_cost).toFixed(0)} under your budget limit.
+                  </div>
+                )}
 
                 <div className="divider" style={{ margin: '20px 0' }} />
 

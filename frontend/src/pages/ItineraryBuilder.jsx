@@ -27,21 +27,29 @@ function fmt(d) {
 function ActivitySection({ stop, tripId, onRefresh }) {
   const [available, setAvailable]   = useState([]);
   const [catFilter, setCatFilter]   = useState('all');
+  const [maxCost, setMaxCost]       = useState(''); // empty string means no limit
   const [schedDate, setSchedDate]   = useState(stop.arrival_date || '');
   const [loadingActs, setLoadingActs] = useState(true);
   const [adding, setAdding]         = useState(null); // activity id being added
 
   useEffect(() => {
     setLoadingActs(true);
-    api.get(`/cities/${stop.city_id}/activities`)
-      .then(({ data }) => setAvailable(data))
-      .catch(() => {})
-      .finally(() => setLoadingActs(false));
-  }, [stop.city_id]);
+    const timer = setTimeout(() => {
+      const params = {};
+      if (catFilter !== 'all') params.category = catFilter;
+      if (maxCost) params.max_cost = parseFloat(maxCost);
+
+      api.get(`/cities/${stop.city_id}/activities`, { params })
+        .then(({ data }) => setAvailable(data))
+        .catch(() => {})
+        .finally(() => setLoadingActs(false));
+    }, 280);
+    return () => clearTimeout(timer);
+  }, [stop.city_id, catFilter, maxCost]);
 
   const attached    = stop.trip_activities || [];
   const attachedIds = new Set(attached.map(ta => ta.activity_id));
-  const filtered    = catFilter === 'all' ? available : available.filter(a => a.category === catFilter);
+  const filtered    = available; // backend handles filtering now
 
   const handleAdd = async (activity) => {
     setAdding(activity.id);
@@ -104,24 +112,39 @@ function ActivitySection({ stop, tripId, onRefresh }) {
         </div>
       </div>
 
-      {/* Category tabs */}
-      <div className="category-tabs">
-        {CATEGORIES.map(cat => (
-          <button
-            key={cat}
-            className={`btn btn-sm cat-tab ${catFilter === cat ? 'active' : ''}`}
-            onClick={() => setCatFilter(cat)}
-          >
-            {CAT_EMOJI[cat]} {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-          </button>
-        ))}
+      {/* Filters row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
+        <div className="category-tabs" style={{ marginBottom: 0 }}>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              className={`btn btn-sm cat-tab ${catFilter === cat ? 'active' : ''}`}
+              onClick={() => setCatFilter(cat)}
+            >
+              {CAT_EMOJI[cat]} {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>
+          ))}
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Max Cost: {maxCost ? `$${maxCost}` : 'Any'}</span>
+          <input 
+            type="range" 
+            min="0" 
+            max="300" 
+            step="10" 
+            value={maxCost || 300} 
+            onChange={e => setMaxCost(e.target.value === "300" ? "" : e.target.value)} 
+            style={{ width: '100px' }}
+          />
+        </div>
       </div>
 
       {/* Activity cards */}
       {loadingActs ? (
         <p style={{ color: 'var(--text-secondary)', fontSize: 13, padding: '8px 0' }}>Loading activities…</p>
       ) : filtered.length === 0 ? (
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, padding: '8px 0' }}>No activities in this category.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 13, padding: '8px 0' }}>No activities match your filters.</p>
       ) : (
         <div className="activity-pick-grid">
           {filtered.map(act => {
@@ -259,18 +282,34 @@ function AddCityModal({ tripId, stopCount, onAdded, onClose }) {
   const [arrival, setArrival]     = useState('');
   const [departure, setDeparture] = useState('');
   const [adding, setAdding]       = useState(false);
+  
+  // Country filter state
+  const [countryFilter, setCountryFilter] = useState('');
+  const [availableCountries, setAvailableCountries] = useState([]);
+
+  // Fetch unique countries on mount
+  useEffect(() => {
+    api.get('/cities').then(({ data }) => {
+      const unique = [...new Set(data.map(c => c.country).filter(Boolean))].sort();
+      setAvailableCountries(unique);
+    }).catch(() => {});
+  }, []);
 
   // Debounced city search
   useEffect(() => {
     setSearching(true);
     const timer = setTimeout(() => {
-      api.get('/cities', { params: search ? { search } : {} })
+      const params = {};
+      if (search) params.search = search;
+      if (countryFilter) params.country = countryFilter;
+      
+      api.get('/cities', { params })
         .then(({ data }) => setResults(data))
         .catch(() => {})
         .finally(() => setSearching(false));
     }, 280);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, countryFilter]);
 
   const handleAdd = async () => {
     if (!selected || adding) return;
@@ -300,15 +339,26 @@ function AddCityModal({ tripId, stopCount, onAdded, onClose }) {
 
         {!selected ? (
           <>
-            <input
-              id="city-search-input"
-              className="form-input"
-              placeholder="Search cities — Paris, Rome, Berlin…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              autoFocus
-              style={{ marginBottom: 12 }}
-            />
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <select 
+                className="form-input" 
+                style={{ width: '150px' }} 
+                value={countryFilter}
+                onChange={e => setCountryFilter(e.target.value)}
+              >
+                <option value="">All Countries</option>
+                {availableCountries.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <input
+                id="city-search-input"
+                className="form-input"
+                style={{ flex: 1, marginBottom: 0 }}
+                placeholder="Search cities — Paris, Rome, Berlin…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
             <div className="city-search-results">
               {searching && <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Searching…</p>}
               {!searching && results.map(city => (

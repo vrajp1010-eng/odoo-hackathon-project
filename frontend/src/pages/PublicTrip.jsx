@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
+import api from '../api';
 
 const COLORS = ['#63b3ed', '#48bb78', '#f6ad55', '#a0aec0'];
 const API_BASE = 'http://localhost:8000'; // Assuming standard location
@@ -15,9 +16,11 @@ function fmtDate(d) {
 
 export default function PublicTrip() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [trip, setTrip]     = useState(null);
   const [budget, setBudget] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [copying, setCopying] = useState(false);
   const [viewMode, setViewMode] = useState('itinerary'); // 'itinerary' | 'timeline'
 
   useEffect(() => {
@@ -34,6 +37,21 @@ export default function PublicTrip() {
     .catch(() => {})
     .finally(() => setLoading(false));
   }, [slug]);
+
+  const handleCopyTrip = async () => {
+    if (copying) return;
+    setCopying(true);
+    try {
+      const { data } = await api.post(`/trips/share/${slug}/copy`);
+      navigate(`/trips/${data.id}/build`);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to copy trip. Please try again.');
+      setCopying(false);
+    }
+  };
+
+  const hasToken = !!localStorage.getItem('token');
 
   if (loading) {
     return (
@@ -76,9 +94,24 @@ export default function PublicTrip() {
               {trip.stops.length} cities
             </p>
           </div>
-          <div style={{ padding: '8px 16px', background: 'var(--bg-surface)', borderRadius: 8, border: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Organized by </span>
-            <span style={{ fontWeight: 600 }}>{trip.user?.name || 'A GlobeTrotter'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {hasToken ? (
+              <button 
+                className="btn btn-primary" 
+                onClick={handleCopyTrip} 
+                disabled={copying}
+              >
+                {copying ? 'Copying…' : 'Copy this trip'}
+              </button>
+            ) : (
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                <Link to="/login" style={{ textDecoration: 'underline', color: 'var(--accent)' }}>Log in</Link> to copy this trip
+              </span>
+            )}
+            <div style={{ padding: '8px 16px', background: 'var(--bg-surface)', borderRadius: 8, border: '1px solid var(--border)' }}>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Organized by </span>
+              <span style={{ fontWeight: 600 }}>{trip.user?.name || 'A GlobeTrotter'}</span>
+            </div>
           </div>
         </div>
 

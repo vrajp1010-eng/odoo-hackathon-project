@@ -31,6 +31,7 @@ class Trip(Base):
     cover_photo_url = Column(String)
     is_public = Column(Boolean, default=False)
     share_slug = Column(String, unique=True, index=True)
+    budget_limit = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     user = relationship("User", back_populates="trips")

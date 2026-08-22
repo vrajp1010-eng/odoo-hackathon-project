@@ -66,6 +66,10 @@ def _calculate_budget(trip: models.Trip) -> dict:
         {"category": "Meals", "amount": estimated_meals},
     ]
 
+    is_over_budget = None
+    if trip.budget_limit is not None:
+        is_over_budget = total_cost > trip.budget_limit
+
     return {
         "total_activities_cost": total_activities_cost,
         "estimated_accommodation": estimated_accommodation,
@@ -74,8 +78,30 @@ def _calculate_budget(trip: models.Trip) -> dict:
         "total_cost": total_cost,
         "cost_per_day": cost_per_day,
         "cost_per_city": cost_per_city,
-        "category_breakdown": category_breakdown
+        "category_breakdown": category_breakdown,
+        "budget_limit": trip.budget_limit,
+        "is_over_budget": is_over_budget,
     }
+
+
+@router.put("/{trip_id}/budget-limit", response_model=schemas.BudgetOut)
+def update_trip_budget_limit(
+    trip_id: int,
+    payload: schemas.TripBudgetLimitUpdate,
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    user = _resolve_user(authorization, db)
+    trip = db.query(models.Trip).filter(
+        models.Trip.id == trip_id, models.Trip.user_id == user.id
+    ).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    trip.budget_limit = payload.budget_limit
+    db.commit()
+    
+    return _calculate_budget(trip)
 
 
 @router.get("/share/{slug}/budget", response_model=schemas.BudgetOut)

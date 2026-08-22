@@ -95,6 +95,69 @@ def get_public_trip(slug: str, db: Session = Depends(get_db)):
     return trip
 
 
+@router.post("/share/{slug}/copy", response_model=schemas.TripOut)
+def copy_public_trip(
+    slug: str, 
+    authorization: Optional[str] = Header(None), 
+    db: Session = Depends(get_db)
+):
+    user = _resolve_user(authorization, db)
+    
+    # 1. Fetch original public trip
+    original_trip = (
+        db.query(models.Trip)
+        .options(
+            joinedload(models.Trip.stops).joinedload(models.TripStop.trip_activities)
+        )
+        .filter(models.Trip.share_slug == slug, models.Trip.is_public == True)
+        .first()
+    )
+    if not original_trip:
+        raise HTTPException(status_code=404, detail="Public trip not found")
+        
+    # 2. Create the new Trip
+    new_trip = models.Trip(
+        user_id=user.id,
+        name=f"{original_trip.name} (Copy)",
+        start_date=original_trip.start_date,
+        end_date=original_trip.end_date,
+        description=original_trip.description,
+        cover_photo_url=original_trip.cover_photo_url,
+        budget_limit=original_trip.budget_limit,
+        is_public=False,
+        share_slug=str(uuid.uuid4())[:8],
+    )
+    db.add(new_trip)
+    db.flush() # get new_trip.id
+    
+    # 3. Clone stops and activities
+    for original_stop in original_trip.stops:
+        new_stop = models.TripStop(
+            trip_id=new_trip.id,
+            city_id=original_stop.city_id,
+            arrival_date=original_stop.arrival_date,
+            departure_date=original_stop.departure_date,
+            order_index=original_stop.order_index,
+        )
+        db.add(new_stop)
+        db.flush() # get new_stop.id
+        
+        for original_activity in original_stop.trip_activities:
+            new_activity = models.TripActivity(
+                trip_stop_id=new_stop.id,
+                activity_id=original_activity.activity_id,
+                scheduled_date=original_activity.scheduled_date,
+                notes=original_activity.notes,
+            )
+            db.add(new_activity)
+            
+    db.commit()
+    db.refresh(new_trip)
+    
+    # We must load the full relations to match the schema
+    return _load_trip_full(new_trip.id, db)
+
+
 # ─── Publish trip ─────────────────────────────────────────────────────────────
 
 @router.put("/{trip_id}/publish", response_model=schemas.TripOut)
