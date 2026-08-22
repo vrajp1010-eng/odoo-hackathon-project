@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+@import "tailwindcss";
+
+/* ---------- Design tokens ---------- */
+@theme {
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+
+  --color-ink: #20231f;
+  --color-navy: #273b38;
+  --color-navy-light: #385752;
+  --color-teal: #277c6d;
+  --color-teal-dark: #195c51;
+  --color-teal-light: #e2f0e8;
+  --color-coral: #d95d43;
+  --color-coral-light: #fbe8e1;
+  --color-paper: #f7f4ed;
+  --color-card: #fffdf9;
+  --color-line: #e4dfd3;
+  --color-muted: #6f756e;
+  --color-saffron: #d58a2b;
+  --color-saffron-light: #fff2d9;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: var(--color-paper);
+  background-image: radial-gradient(#e8e2d7 0.7px, transparent 0.7px);
+  background-size: 18px 18px;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono-data {
+  font-family: var(--font-mono);
+}
+
+.page-enter {
+  animation: page-enter 500ms ease-out both;
+}
+
+.photo-wash {
+  background: linear-gradient(115deg, rgba(19, 39, 36, 0.78), rgba(19, 39, 36, 0.12));
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Perforated / boarding-pass divider used on stop cards */
+.perforation {
+  position: relative;
+  border-top: 2px dashed var(--color-line);
+}
+.perforation::before,
+.perforation::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  background: var(--color-paper);
+  border-radius: 9999px;
+  border: 2px solid var(--color-line);
+}
+.perforation::before { left: -10px; }
+.perforation::after { right: -10px; }
+
+/* Dotted flight-path connector between stops */
+.flight-path {
+  background-image: radial-gradient(var(--color-saffron) 1.5px, transparent 1.5px);
+  background-size: 6px 10px;
+  background-repeat: repeat-y;
+  width: 2px;
+}
+
+/* Visible keyboard focus ring everywhere, per accessibility floor */
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
