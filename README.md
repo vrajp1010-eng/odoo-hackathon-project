@@ -118,4 +118,4 @@ python -m uvicorn app.main:app --reload
 - The SQLite database is stored at `backend/globetrotter.db` and is intentionally local. Delete that file while the backend is stopped to start with a fresh database.
 - If the frontend reports a network error, confirm that the backend is running at the URL in `VITE_API_URL` and that the frontend was restarted after changing `.env`.
 - Password reset is a local demo flow: the API returns a reset token instead of sending email. Treat that token as temporary development data.
-- The app currently stores the signed-in user in browser local storage; this is suitable for the local hackathon demo, not production authentication.
+- The app currently stores the signed-in user in browser local storage; this is suitable for the local hackathon demo, not production authentication..
