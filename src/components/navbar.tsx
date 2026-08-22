@@ -3,10 +3,19 @@
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Globe, Menu, User, LogOut } from 'lucide-react'
+import { Menu, User, LogOut, Search } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useState } from 'react'
+import { cn } from '@/lib/utils'
+
+const links = [
+  { href: '/dashboard', label: 'Explore' },
+  { href: '/trips', label: 'Trips' },
+  { href: '/search', label: 'Search' },
+  { href: '/community', label: 'Community' },
+  { href: '/calendar', label: 'Calendar' },
+]
 
 export function Navbar() {
   const { data: session, status } = useSession()
@@ -14,76 +23,91 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  if (pathname === '/') {
-    return null
-  }
+  const hide = pathname === '/login' || pathname === '/signup'
+  if (hide) return null
+
+  const transparent = pathname === '/'
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-border/50 shadow-sm">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2">
-
-          <span className="gradient-text font-extrabold text-xl tracking-tight">GlobeTrotter</span>
+    <header
+      className={cn(
+        'z-50 border-b',
+        transparent
+          ? 'absolute inset-x-0 top-0 border-white/10 bg-transparent text-white'
+          : 'sticky top-0 border-white/40 bg-white/70 shadow-xl shadow-black/5 backdrop-blur-md'
+      )}
+    >
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
+        <Link href="/" className="font-display text-xl font-extrabold tracking-tight">
+          GlobeTrotter
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
-            Dashboard
-          </Link>
-          <Link href="/trips" className="text-sm font-medium transition-colors hover:text-primary">
-            My Trips
-          </Link>
-          <Link href="/profile" className="text-sm font-medium transition-colors hover:text-primary">
-            Profile
-          </Link>
+        <nav className="hidden items-center gap-7 md:flex">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'text-sm font-medium transition-all duration-300 hover:opacity-100',
+                pathname.startsWith(link.href) ? 'opacity-100' : 'opacity-70'
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Link
+            href="/search"
+            className={buttonVariants({ variant: 'ghost', size: 'icon', className: 'hidden sm:inline-flex' })}
+          >
+            <Search className="h-4 w-4" />
+          </Link>
           {status === 'loading' ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+            <div className="h-9 w-9 animate-pulse rounded-full bg-black/10" />
           ) : session ? (
             <div className="relative">
-              <Button 
-                variant="ghost" 
-                className="relative h-8 w-8 rounded-full p-0"
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-full p-0"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-9 w-9 ring-2 ring-white/50">
                   {session.user?.image ? (
                     <AvatarImage src={session.user.image} alt={session.user?.name || 'User'} />
                   ) : null}
-                  <AvatarFallback className="bg-blue-100 text-blue-700">
+                  <AvatarFallback className="bg-accent/15 text-accent">
                     {session.user?.name?.[0]?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
               </Button>
-              
+
               {isDropdownOpen && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-40"
-                    onClick={() => setIsDropdownOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50 py-1">
-                    <div className="px-4 py-2 border-b">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {session.user?.name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {session.user?.email}
-                      </p>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                  <div className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-2xl border border-white/60 bg-white/95 py-1 text-foreground shadow-xl shadow-black/10 backdrop-blur-md">
+                    <div className="border-b border-border px-4 py-3">
+                      <p className="truncate text-sm font-semibold">{session.user?.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{session.user?.email}</p>
                     </div>
-                    <Link 
-                      href="/profile" 
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    <Link
+                      href="/profile"
+                      className="flex items-center px-4 py-2.5 text-sm transition-colors hover:bg-secondary"
                       onClick={() => setIsDropdownOpen(false)}
                     >
                       <User className="mr-2 h-4 w-4" />
                       Profile
                     </Link>
+                    <Link
+                      href="/admin"
+                      className="flex items-center px-4 py-2.5 text-sm transition-colors hover:bg-secondary"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      Admin
+                    </Link>
                     <button
-                      className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      className="flex w-full items-center px-4 py-2.5 text-sm text-destructive hover:bg-secondary"
                       onClick={() => {
                         setIsDropdownOpen(false)
                         signOut({ callbackUrl: '/' })
@@ -97,49 +121,41 @@ export function Navbar() {
               )}
             </div>
           ) : (
-            <div className="hidden md:flex gap-2">
-              <Link href="/login" className={buttonVariants({ variant: "ghost" })}>
+            <div className="hidden gap-2 md:flex">
+              <Link href="/login" className={buttonVariants({ variant: transparent ? 'ghost' : 'ghost' })}>
                 Login
               </Link>
-              <Link href="/signup" className={buttonVariants({ className: "bg-blue-600 hover:bg-blue-700 text-white" })}>
-                Sign Up
+              <Link href="/signup" className={buttonVariants({ variant: transparent ? 'secondary' : 'default' })}>
+                Sign up
               </Link>
             </div>
           )}
 
-          {/* Mobile Nav Toggle */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
           </Button>
         </div>
       </div>
-      
-      {/* Mobile Menu Dropdown */}
+
       {isOpen && (
-        <div className="md:hidden border-t bg-white px-4 py-4 space-y-4">
-          <Link href="/dashboard" className="block text-base font-medium" onClick={() => setIsOpen(false)}>
-            Dashboard
-          </Link>
-          <Link href="/trips" className="block text-base font-medium" onClick={() => setIsOpen(false)}>
-            My Trips
-          </Link>
-          <Link href="/profile" className="block text-base font-medium" onClick={() => setIsOpen(false)}>
-            Profile
-          </Link>
-          
+        <div className="space-y-1 border-t border-white/20 bg-white px-4 py-4 text-foreground md:hidden">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="block rounded-2xl px-3 py-2.5 text-base font-medium hover:bg-secondary"
+              onClick={() => setIsOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
           {!session && (
-            <div className="pt-4 border-t flex flex-col gap-2">
-              <Link href="/login" className={buttonVariants({ variant: "outline", className: "w-full justify-start" })} onClick={() => setIsOpen(false)}>
+            <div className="mt-3 flex flex-col gap-2 border-t pt-3">
+              <Link href="/login" className={buttonVariants({ variant: 'outline' })} onClick={() => setIsOpen(false)}>
                 Login
               </Link>
-              <Link href="/signup" className={buttonVariants({ className: "w-full justify-start bg-blue-600 hover:bg-blue-700 text-white" })} onClick={() => setIsOpen(false)}>
-                Sign Up
+              <Link href="/signup" className={buttonVariants()} onClick={() => setIsOpen(false)}>
+                Sign up
               </Link>
             </div>
           )}

@@ -2,252 +2,147 @@ import { requireAuth } from '@/lib/auth-helpers'
 import { getUserTrips } from '@/actions/trip-actions'
 import { getPopularCities } from '@/actions/catalog-actions'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Calendar, MapPin, Navigation, Plus, TrendingUp, Globe, Sparkles, ArrowRight, Clock } from 'lucide-react'
+import { Calendar, MapPin, Plus, Globe, ArrowRight } from 'lucide-react'
+import { DestinationCard, HorizontalScroller } from '@/components/destination-card'
+import { HeroSearch } from '@/components/hero-search'
+import { AiCopilot } from '@/components/ai-copilot'
+import { HERO_IMAGES, FALLBACK_CITY } from '@/lib/media'
+import { getTripStatus, tripStatusCopy } from '@/lib/trip-status'
 
 export default async function DashboardPage() {
   const session = await requireAuth()
-  
+
   const [trips, popularCities] = await Promise.all([
     getUserTrips(),
     getPopularCities()
   ])
 
-  const now = new Date()
-  const upcomingTrips = trips.filter(t => t.startDate && new Date(t.startDate) >= now)
-  const nextTrip = upcomingTrips[0] ?? null
+  const previousTrips = trips.filter((t) => getTripStatus(t) === 'completed' || getTripStatus(t) === 'unscheduled')
+  const nextTrip = trips.find((t) => getTripStatus(t) === 'upcoming' || getTripStatus(t) === 'ongoing') ?? null
   const countriesVisited = new Set(
     trips.flatMap(t => t.tripStops?.map(s => s.city?.country ?? '') ?? [])
   ).size
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* ===== HERO SECTION ===== */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 text-white">
-        {/* decorative blobs */}
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
-          {/* Greeting */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-              <p className="text-indigo-200 text-sm font-medium mb-1 uppercase tracking-widest">Travel Command Center</p>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Welcome back, {session.user.name?.split(' ')[0] || 'Explorer'}! ✈️
-              </h1>
-            </div>
-            <Link href="/trips/new" className={buttonVariants({ variant: 'secondary', className: 'shrink-0 font-semibold' })}>
-              <Plus className="mr-2 h-4 w-4" />
-              Plan a New Trip
-            </Link>
-          </div>
-
-          {/* Stats bar */}
-          <div className="grid grid-cols-3 gap-3 mb-8">
+    <div className="min-h-screen overflow-x-hidden">
+      <section className="relative flex min-h-[72vh] items-end">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={HERO_IMAGES.dashboard} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25" />
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-20 pt-16 md:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/65">Your studio</p>
+          <h1 className="mt-3 font-display text-4xl font-extrabold text-white md:text-6xl">
+            Welcome back, {session.user.name?.split(' ')[0] || 'Explorer'}
+          </h1>
+          <div className="mt-8 grid max-w-lg grid-cols-3 gap-3">
             {[
-              { label: 'Total Trips', value: trips.length, icon: Navigation },
-              { label: 'Upcoming', value: upcomingTrips.length, icon: Calendar },
-              { label: 'Countries', value: countriesVisited, icon: Globe },
-            ].map(({ label, value, icon: Icon }) => (
-              <div key={label} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
-                <Icon className="h-5 w-5 mx-auto mb-1 text-indigo-200" />
-                <p className="text-2xl font-bold">{value}</p>
-                <p className="text-xs text-indigo-200 mt-0.5">{label}</p>
+              { label: 'Trips', value: trips.length },
+              { label: 'Upcoming', value: trips.filter(t => getTripStatus(t) === 'upcoming').length },
+              { label: 'Countries', value: countriesVisited },
+            ].map((stat) => (
+              <div key={stat.label} className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center backdrop-blur-md">
+                <p className="font-display text-2xl font-bold text-white">{stat.value}</p>
+                <p className="mt-1 text-[11px] uppercase tracking-widest text-white/65">{stat.label}</p>
               </div>
             ))}
           </div>
-
-          {/* Next Adventure hero card */}
-          {nextTrip ? (
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex-1 min-w-0">
-                <p className="text-indigo-200 text-xs uppercase tracking-widest mb-1">Your Next Adventure</p>
-                <h2 className="text-2xl font-bold truncate">{nextTrip.title}</h2>
-                <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-indigo-100">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {nextTrip.startDate ? new Date(nextTrip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {nextTrip.tripStops?.length ?? 0} {nextTrip.tripStops?.length === 1 ? 'stop' : 'stops'}
-                  </span>
-                </div>
-              </div>
-              <Link
-                href={`/trips/${nextTrip.id}`}
-                className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'shrink-0 font-semibold' })}
-              >
-                View Itinerary <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </div>
-          ) : (
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 text-center">
-              <Navigation className="h-10 w-10 mx-auto mb-3 text-indigo-200 opacity-70" />
-              <h2 className="text-xl font-semibold mb-1">No upcoming trips yet</h2>
-              <p className="text-indigo-200 text-sm mb-4">Your next adventure is just one click away.</p>
-              <Link href="/trips/new" className={buttonVariants({ variant: 'secondary', className: 'font-semibold' })}>
-                <Plus className="mr-2 h-4 w-4" /> Start Planning
-              </Link>
-            </div>
-          )}
+          <div className="relative mt-12 translate-y-1/2">
+            <HeroSearch />
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* ===== MAIN CONTENT ===== */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-
-        {/* AI COPILOT PLACEHOLDER — AiCopilot component will be added in Phase 2 */}
-        <AiCopilotSection />
-
-        {/* My Trips */}
-        <section>
-          <div className="flex items-center justify-between mb-5">
+      <div className="mx-auto max-w-7xl space-y-16 px-4 pb-20 pt-24 md:px-6">
+        {nextTrip && (
+          <div className="flex flex-col gap-4 rounded-3xl border border-white/60 bg-card p-6 shadow-xl shadow-black/5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">My Trips</h2>
-              <p className="text-muted-foreground text-sm mt-0.5">{trips.length} trip{trips.length !== 1 ? 's' : ''} in your collection</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Next departure</p>
+              <h2 className="mt-1 font-display text-2xl font-bold">{nextTrip.title}</h2>
+              <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-3.5 w-3.5" />
+                {nextTrip.startDate ? new Date(nextTrip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Dates open'}
+              </p>
             </div>
-            <Link href="/trips" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-              View all <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            <Link href={`/trips/${nextTrip.id}`} className={buttonVariants({ variant: 'accent' })}>
+              Open itinerary <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
+        )}
 
-          {trips.length === 0 ? (
-            <Card className="border-dashed border-2">
-              <CardContent className="flex flex-col items-center justify-center py-14 text-center">
-                <div className="h-16 w-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
-                  <Navigation className="h-8 w-8 text-indigo-400" />
-                </div>
-                <h3 className="text-lg font-semibold">No trips yet</h3>
-                <p className="text-sm text-muted-foreground mt-1 mb-5 max-w-xs">
-                  Start planning your first multi-city adventure.
-                </p>
-                <Link href="/trips/new" className={buttonVariants()}>
-                  <Plus className="mr-2 h-4 w-4" /> Create Your First Trip
-                </Link>
-              </CardContent>
-            </Card>
+        <AiCopilot />
+
+        <section>
+          <div className="mb-6 flex items-end justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Regions</p>
+              <h2 className="mt-1 font-display text-3xl font-bold">Top regional selections</h2>
+            </div>
+            <Link href="/search" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>Browse all</Link>
+          </div>
+          <HorizontalScroller>
+            {popularCities.map((city) => (
+              <div key={city.id} className="w-[250px] snap-start">
+                <DestinationCard
+                  name={city.name}
+                  country={city.country}
+                  imageUrl={city.imageUrl}
+                  href="/search"
+                  meta={`${city._count?.activities ?? 0} activities`}
+                />
+              </div>
+            ))}
+          </HorizontalScroller>
+        </section>
+
+        <section>
+          <div className="mb-6 flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-bold">Previous trips</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Your archive, still glowing.</p>
+            </div>
+            <Link href="/trips" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+              View all
+            </Link>
+          </div>
+          {previousTrips.length === 0 && trips.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
+              <Globe className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
+              <h3 className="font-display text-xl font-semibold">No trips yet</h3>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Start with a destination and we will shape the rest.</p>
+              <Link href="/trips/new" className={buttonVariants({ variant: 'accent', className: 'mt-6' })}>
+                <Plus className="mr-2 h-4 w-4" /> Plan a trip
+              </Link>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {trips.slice(0, 6).map((trip, i) => {
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {(previousTrips.length ? previousTrips : trips).slice(0, 6).map((trip) => {
                 const firstCity = trip.tripStops?.[0]?.city
-                const isUpcoming = trip.startDate && new Date(trip.startDate) >= now
-                const isPast = trip.endDate && new Date(trip.endDate) < now
+                const status = getTripStatus(trip)
                 return (
-                  <Card key={trip.id} className="group overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 border-border/60">
-                    {/* City image banner */}
-                    <div className="h-32 relative bg-gradient-to-br from-indigo-400 to-purple-500 overflow-hidden">
-                      {firstCity?.imageUrl ? (
-                        <Image
-                          src={firstCity.imageUrl}
-                          alt={firstCity.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : null}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
-                        <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm text-xs">
-                          {trip.tripStops?.length ?? 0} stop{(trip.tripStops?.length ?? 0) !== 1 ? 's' : ''}
-                        </Badge>
-                        {isUpcoming && (
-                          <Badge className="bg-green-500/80 text-white border-0 text-xs">
-                            Upcoming
-                          </Badge>
-                        )}
-                        {isPast && (
-                          <Badge className="bg-slate-500/80 text-white border-0 text-xs">
-                            Completed
-                          </Badge>
-                        )}
-                      </div>
+                  <Link key={trip.id} href={`/trips/${trip.id}`} className="group overflow-hidden rounded-3xl bg-card shadow-xl shadow-black/5 transition-all duration-300 hover:-translate-y-1">
+                    <div className="relative h-40">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={firstCity?.imageUrl || FALLBACK_CITY} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                      <span className="absolute bottom-3 left-3 rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                        {tripStatusCopy[status]}
+                      </span>
                     </div>
-
-                    <CardHeader className="pb-2 pt-4">
-                      <CardTitle className="text-base font-bold leading-snug group-hover:text-primary transition-colors">{trip.title}</CardTitle>
-                      <CardDescription className="flex items-center gap-1.5 text-xs">
-                        <Calendar className="h-3 w-3" />
-                        {trip.startDate ? new Date(trip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date set'}
-                        {trip.endDate && ` – ${new Date(trip.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
-                      </CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="flex-1 pb-2">
-                      <div className="flex flex-wrap gap-1.5">
-                        {trip.tripStops?.slice(0, 3).map(stop => (
-                          <span key={stop.id} className="text-xs text-muted-foreground flex items-center gap-0.5">
-                            <MapPin className="h-2.5 w-2.5" />{stop.city?.name ?? 'Unknown'}
-                          </span>
-                        ))}
-                        {(trip.tripStops?.length ?? 0) > 3 && (
-                          <span className="text-xs text-muted-foreground">+{(trip.tripStops?.length ?? 0) - 3} more</span>
-                        )}
-                      </div>
-                    </CardContent>
-
-                    <CardFooter className="pt-0 pb-4">
-                      <Link href={`/trips/${trip.id}`} className={buttonVariants({ size: 'sm', className: 'w-full' })}>
-                        Open Itinerary <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                      </Link>
-                    </CardFooter>
-                  </Card>
+                    <div className="p-5">
+                      <h3 className="font-display text-lg font-semibold">{trip.title}</h3>
+                      <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {trip.tripStops?.length ?? 0} stops
+                      </p>
+                    </div>
+                  </Link>
                 )
               })}
             </div>
           )}
         </section>
-
-        {/* Popular Destinations */}
-        <section>
-          <div className="mb-5">
-            <h2 className="text-2xl font-bold tracking-tight">Discover Destinations</h2>
-            <p className="text-muted-foreground text-sm mt-0.5">Most popular cities among Globe Trotter travelers</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {popularCities.map(city => (
-              <div key={city.id} className="group relative overflow-hidden rounded-xl aspect-square cursor-pointer">
-                {city.imageUrl ? (
-                  <Image
-                    src={city.imageUrl}
-                    alt={city.name}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-indigo-400 to-purple-600" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                  <p className="text-white font-semibold text-sm leading-tight">{city.name}</p>
-                  <p className="text-white/70 text-xs">{city._count?.activities ?? 0} activities</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
     </div>
-  )
-}
-
-// Placeholder that will be replaced when AiCopilot component is wired in
-function AiCopilotSection() {
-  return (
-    <section className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-6">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-          <Sparkles className="h-4 w-4 text-white" />
-        </div>
-        <div>
-          <h3 className="font-bold text-base">AI Travel Copilot</h3>
-          <p className="text-xs text-muted-foreground">Let AI plan your perfect itinerary</p>
-        </div>
-      </div>
-      <p className="text-sm text-muted-foreground">Loading AI Copilot...</p>
-    </section>
   )
 }

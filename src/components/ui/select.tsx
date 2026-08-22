@@ -36,7 +36,7 @@ export const SelectTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTM
       ref={ref}
       type="button"
       onClick={() => ctx?.setOpen(!ctx.open)}
-      className={cn("flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50", className)}
+      className={cn("flex h-12 w-full items-center justify-between rounded-2xl border border-border bg-white/80 px-4 py-2 text-sm shadow-sm shadow-black/5 ring-offset-background transition-all duration-300 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-50", className)}
       {...props}
     >
       {children}
@@ -59,7 +59,7 @@ export const SelectContent = React.forwardRef<HTMLDivElement, React.HTMLAttribut
       <div className="fixed inset-0 z-40" onClick={() => ctx.setOpen(false)} />
       <div
         ref={ref}
-        className={cn("absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white py-1 text-gray-950 shadow-md animate-in fade-in-80", className)}
+        className={cn("absolute top-full z-50 mt-2 max-h-60 w-full overflow-auto rounded-2xl border border-white/60 bg-white/95 py-1 text-foreground shadow-xl shadow-black/5 backdrop-blur-md", className)}
         {...props}
       >
         {children}

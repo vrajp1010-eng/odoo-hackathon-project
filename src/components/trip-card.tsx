@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, MapPin, Trash2, Globe, Lock } from 'lucide-react'
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -18,15 +18,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { deleteTrip } from '@/actions/trip-actions'
-
 import { useToast } from '@/components/ui/toaster'
+import { FALLBACK_CITY } from '@/lib/media'
+import { getTripStatus, tripStatusCopy } from '@/lib/trip-status'
 
 export function TripCard({ trip }: { trip: any }) {
   const router = useRouter()
   const { toast } = useToast()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  
+  const cover = trip.tripStops?.[0]?.city?.imageUrl || FALLBACK_CITY
+  const status = getTripStatus(trip)
+
   const handleDelete = async () => {
     setIsDeleting(true)
     try {
@@ -34,73 +37,69 @@ export function TripCard({ trip }: { trip: any }) {
       setDialogOpen(false)
       toast({ title: 'Trip Deleted', description: 'Your trip was removed.' })
       router.refresh()
-    } catch (error) {
-      console.error('Failed to delete trip', error)
+    } catch {
       toast({ title: 'Error', description: 'Failed to delete trip.', variant: 'destructive' })
       setIsDeleting(false)
     }
   }
 
   return (
-    <Card className="flex flex-col overflow-hidden hover:border-primary/50 transition-colors group">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start gap-4">
-          <CardTitle className="line-clamp-1">{trip.title}</CardTitle>
-          <Badge variant={trip.isPublic ? "default" : "secondary"} className="shrink-0 flex items-center gap-1">
-            {trip.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-            <span className="sr-only sm:not-sr-only sm:inline-block text-[10px] uppercase">
-              {trip.isPublic ? 'Public' : 'Private'}
-            </span>
+    <Card className="group flex flex-col overflow-hidden hover:-translate-y-1">
+      <div className="relative h-40">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={cover} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        <div className="absolute left-3 top-3 flex gap-2">
+          <Badge className="border-0 bg-white/20 text-white backdrop-blur-md">{tripStatusCopy[status]}</Badge>
+          <Badge className="border-0 bg-black/30 text-white backdrop-blur-md">
+            {trip.isPublic ? <Globe className="mr-1 h-3 w-3" /> : <Lock className="mr-1 h-3 w-3" />}
+            {trip.isPublic ? 'Public' : 'Private'}
           </Badge>
         </div>
-        <CardDescription className="flex items-center gap-1 mt-1.5 font-medium">
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="font-display text-lg font-semibold leading-snug">{trip.title}</h3>
+        <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
-          {trip.startDate ? new Date(trip.startDate).toLocaleDateString() : 'N/A'} - {trip.endDate ? new Date(trip.endDate).toLocaleDateString() : 'N/A'}
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="flex-1 pb-4">
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
-          <MapPin className="h-4 w-4" />
-          {trip.tripStops?.length || 0} cities planned
+          {trip.startDate ? new Date(trip.startDate).toLocaleDateString() : 'Open dates'}
+        </p>
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5" />
+          {trip.tripStops?.length || 0} cities
+        </p>
+        <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{trip.description || 'No description yet.'}</p>
+        <div className="mt-5 flex gap-2">
+          <Link href={`/trips/${trip.id}`} className={buttonVariants({ className: 'flex-1' })}>
+            View
+          </Link>
+          <Button variant="outline" size="icon" onClick={() => setDialogOpen(true)} className="text-destructive">
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
-        <p className="text-sm line-clamp-2 text-muted-foreground">{trip.description || 'No description provided.'}</p>
-      </CardContent>
-      
-      <CardFooter className="pt-0 flex gap-2">
-        <Link href={`/trips/${trip.id}`} className={buttonVariants({ className: "flex-1" })}>
-          View
-        </Link>
-        
-        <Button variant="outline" size="icon" onClick={() => setDialogOpen(true)} className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20">
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Delete trip</span>
-        </Button>
-        <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your trip
-                "{trip.title}" and remove all associated data, stops, and activities.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setDialogOpen(false)}>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={(e) => {
-                  e.preventDefault()
-                  handleDelete()
-                }}
-                disabled={isDeleting}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {isDeleting ? 'Deleting...' : 'Delete'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </CardFooter>
+      </div>
+      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this trip?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes “{trip.title}” and all stops, activities, and budget data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDialogOpen(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                handleDelete()
+              }}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

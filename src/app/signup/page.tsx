@@ -1,14 +1,14 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signup } from '@/actions/auth-actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Globe } from 'lucide-react'
+import { AuthShell } from '@/components/auth-shell'
+import { Camera } from 'lucide-react'
 
 const initialState = {
   error: undefined,
@@ -18,6 +18,7 @@ const initialState = {
 export default function SignupPage() {
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(signup, initialState)
+  const [preview, setPreview] = useState<string | null>(null)
 
   useEffect(() => {
     if (state?.success) {
@@ -29,84 +30,70 @@ export default function SignupPage() {
   }, [state?.success, router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2">
-            <Globe className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">Globe Trotter</span>
-          </Link>
-        </div>
-        
-        <Card className="shadow-lg border-none">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-            <CardDescription>
-              Enter your details to start planning your journeys
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {state?.success ? (
-              <div className="text-center py-6">
-                <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4 border border-green-200">
-                  <h3 className="font-bold text-lg mb-1">Success!</h3>
-                  <p>{'Account created successfully.'}</p>
-                </div>
-                <p className="text-sm text-gray-600">Redirecting to login...</p>
-              </div>
+    <AuthShell>
+      <div className="w-full max-w-md rounded-3xl border border-white/25 bg-white/15 p-8 shadow-xl shadow-black/20 backdrop-blur-md">
+        <div className="mb-6 text-center">
+          <label className="group relative mx-auto mb-5 flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-white/10 shadow-xl shadow-black/20 transition-all duration-300 hover:scale-105">
+            {preview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={preview} alt="Preview" className="h-full w-full object-cover" />
             ) : (
-              <form action={formAction} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    placeholder="John Doe"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                  />
-                </div>
-                
-                {state?.error && !state.success && (
-                  <div className="text-sm text-red-500 font-medium bg-red-50 p-3 rounded-md border border-red-100">
-                    {state.error}
-                  </div>
-                )}
-                
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isPending}>
-                  {isPending ? 'Creating account...' : 'Sign Up'}
-                </Button>
-              </form>
+              <Camera className="h-7 w-7 text-white/80" />
             )}
-          </CardContent>
-          <CardFooter className="flex flex-col items-center">
-            <div className="mt-2 text-sm text-center text-gray-600">
-              Already have an account?{' '}
-              <Link href="/login" className="text-blue-600 font-semibold hover:underline">
-                Log in
-              </Link>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setPreview(URL.createObjectURL(file))
+              }}
+            />
+          </label>
+          <h1 className="font-display text-3xl font-bold text-white">Join the journey</h1>
+          <p className="mt-2 text-sm text-white/70">A photo is optional — your next trip is not.</p>
+        </div>
+
+        {state?.success ? (
+          <div className="rounded-2xl bg-emerald-400/20 p-5 text-center text-white">
+            <p className="font-semibold">Account created</p>
+            <p className="mt-1 text-sm text-white/80">Redirecting you to login…</p>
+          </div>
+        ) : (
+          <form action={formAction} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-white/80">Full name</Label>
+              <Input id="name" name="name" placeholder="Ada Lovelace" required className="border-white/20 bg-white/90" />
             </div>
-          </CardFooter>
-        </Card>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-white/80">Email</Label>
+              <Input id="email" name="email" type="email" placeholder="you@wander.com" required className="border-white/20 bg-white/90" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-white/80">Password</Label>
+              <Input id="password" name="password" type="password" required className="border-white/20 bg-white/90" />
+            </div>
+
+            {state?.error && !state.success && (
+              <div className="rounded-2xl bg-red-500/20 p-3 text-sm text-red-50">
+                {state.error}
+              </div>
+            )}
+
+            <Button type="submit" variant="accent" className="w-full" disabled={isPending}>
+              {isPending ? 'Creating account…' : 'Create account'}
+            </Button>
+          </form>
+        )}
+
+        <p className="mt-6 text-center text-sm text-white/70">
+          Already wandering?{' '}
+          <Link href="/login" className="font-semibold text-white underline-offset-4 hover:underline">
+            Log in
+          </Link>
+        </p>
       </div>
-    </div>
+    </AuthShell>
   )
 }

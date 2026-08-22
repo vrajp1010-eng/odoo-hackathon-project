@@ -102,7 +102,7 @@ export function AiCopilot() {
   }
 
   return (
-    <section className="bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 border border-indigo-100 rounded-2xl p-6">
+    <section className="rounded-3xl border border-white/60 bg-card p-6 shadow-xl shadow-black/5 md:p-8">
       {/* Header */}
       <div className="flex items-start gap-3 mb-5">
         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-md">
