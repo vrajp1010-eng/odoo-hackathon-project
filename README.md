@@ -1,4 +1,4 @@
-# 🌍 Globe Trotter
+# 🌍 Globe Trotter..
 
 **Plan your dream multi-city adventures with ease.**
 
