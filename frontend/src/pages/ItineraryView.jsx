@@ -104,7 +104,7 @@ export default function ItineraryView() {
               </div>
             ) : (
               <button className="btn btn-outline" onClick={handleShare} disabled={sharing}>
-                {sharing ? 'Publishing…' : '🌍 Publish & Share'}
+                {sharing ? 'Publishing…' : 'Publish & Share'}
               </button>
             )}
             <Link to={`/trips/${trip.id}/build`} className="btn btn-primary">Edit Itinerary</Link>

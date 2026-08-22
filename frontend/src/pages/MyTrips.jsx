@@ -80,7 +80,7 @@ export default function MyTrips() {
             border: '2px dashed var(--border)', borderRadius: 'var(--radius-lg)',
             padding: '64px 24px', textAlign: 'center', marginTop: 32,
           }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>🗺️</div>
+            <div style={{ fontSize: 56, marginBottom: 16 }}></div>
             <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>No trips yet</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: 24, maxWidth: 380, margin: '0 auto 24px' }}>
               Start planning your first multi-city adventure. Add cities, pick activities, and share with friends.

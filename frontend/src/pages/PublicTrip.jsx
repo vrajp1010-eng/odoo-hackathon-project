@@ -49,7 +49,7 @@ export default function PublicTrip() {
     return (
       <main className="page">
         <div className="container" style={{ textAlign: 'center', paddingTop: 60 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+          <div style={{ fontSize: 48, marginBottom: 16 }}></div>
           <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Trip Not Found</h2>
           <p style={{ color: 'var(--text-secondary)' }}>This trip may have been unshared or deleted.</p>
           <Link to="/" className="btn btn-primary" style={{ marginTop: 24 }}>Go to GlobeTrotter</Link>
@@ -62,7 +62,7 @@ export default function PublicTrip() {
     <main className="page" style={{ paddingBottom: 80 }}>
       {/* Public Top Banner */}
       <div style={{ background: 'var(--accent)', color: '#000', padding: '12px 0', textAlign: 'center', fontWeight: 600, fontSize: 14 }}>
-        You are viewing a shared itinerary created on GlobeTrotter. 🌍 <Link to="/" style={{ color: '#000', textDecoration: 'underline', marginLeft: 8 }}>Create your own!</Link>
+        You are viewing a shared itinerary created on GlobeTrotter. <Link to="/" style={{ color: '#000', textDecoration: 'underline', marginLeft: 8 }}>Create your own!</Link>
       </div>
 
       <div className="container" style={{ paddingTop: 32 }}>

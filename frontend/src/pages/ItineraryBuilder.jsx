@@ -14,7 +14,7 @@ import api from '../api';
    Helpers
 ══════════════════════════════════════════════════════════════════════════════ */
 const CATEGORIES = ['all', 'sightseeing', 'food', 'adventure'];
-const CAT_EMOJI  = { sightseeing: '🏛️', food: '🍽️', adventure: '🧗', all: '✨' };
+const CAT_EMOJI  = { sightseeing: '', food: '', adventure: '', all: '' };
 
 function fmt(d) {
   if (!d) return '—';
@@ -388,7 +388,7 @@ function AddCityModal({ tripId, stopCount, onAdded, onClose }) {
               onClick={handleAdd}
               disabled={adding}
             >
-              {adding ? 'Adding…' : `✈️ Add ${selected.name} to Trip`}
+              {adding ? 'Adding…' : `Add ${selected.name} to Trip`}
             </button>
           </div>
         )}
@@ -499,7 +499,7 @@ export default function ItineraryBuilder() {
         {/* ── Stop list ────────────────────────────────────────────────────── */}
         {stops.length === 0 ? (
           <div className="builder-empty">
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🗺️</div>
+            <div style={{ fontSize: 48, marginBottom: 12 }}></div>
             <h2>No cities yet</h2>
             <p>Add your first city stop to start building the itinerary.</p>
             <button

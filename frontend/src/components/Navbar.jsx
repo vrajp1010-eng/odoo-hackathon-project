@@ -12,8 +12,7 @@ export default function Navbar({ user, onLogout, apiStatus }) {
     <nav className="navbar">
       <div className="container navbar-inner">
         <Link to={user ? '/dashboard' : '/login'} className="navbar-brand">
-          <span className="globe-icon">🌍</span>
-          Globe<span>Trotter</span>
+          GlobeTrotter
         </Link>
 
         <div className="navbar-links">

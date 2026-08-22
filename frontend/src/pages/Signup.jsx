@@ -51,7 +51,7 @@ export default function Signup({ onLogin }) {
     <div className="auth-wrap">
       <div className="auth-card">
         <div className="auth-logo">
-          <h1>🌍 Globe<span>Trotter</span></h1>
+          <h1>GlobeTrotter</h1>
           <p>Create your free account</p>
         </div>
 
